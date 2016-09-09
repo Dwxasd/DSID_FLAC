@@ -15,26 +15,26 @@
 
 
 #ifdef DSID_EXPORTS
-    int __stdcall DllMain(void *,unsigned, void *) {
-        return(1);
-    }
+int __stdcall DllMain(void *,unsigned, void *) {
+    return(1);
+}
 
-    extern "C" EXPORT_TAG const char *getName() {
-        return "modeldsid";
-    }
+extern "C" EXPORT_TAG const char *getName() {
+    return "modeldsid";
+}
 
-    extern "C" EXPORT_TAG unsigned getMajorVersion() {
-        return MAJOR_VERSION;
-    }
+extern "C" EXPORT_TAG unsigned getMajorVersion() {
+    return MAJOR_VERSION;
+}
 
-    extern "C" EXPORT_TAG unsigned getMinorVersion() {
-        return MINOR_VERSION;
-    }
+extern "C" EXPORT_TAG unsigned getMinorVersion() {
+    return MINOR_VERSION;
+}
 
-    extern "C" EXPORT_TAG void *createInstance() {
-        models::Modeldsid *m = new models::Modeldsid();
-        return((void *)m);
-    }
+extern "C" EXPORT_TAG void *createInstance() {
+    models::Modeldsid *m = new models::Modeldsid();
+    return((void *)m);
+}
 #endif // DSID_EXPORTS
 
 namespace models {
