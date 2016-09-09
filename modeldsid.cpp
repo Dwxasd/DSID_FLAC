@@ -704,4 +704,5 @@ namespace models {
         }
     }
 }
+
 // EOF
