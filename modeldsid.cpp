@@ -15,26 +15,26 @@
 
 
 #ifdef DSID_EXPORTS
-    int __stdcall DllMain(void *,unsigned, void *) {
-        return(1);
-    }
+int __stdcall DllMain(void *,unsigned, void *) {
+    return(1);
+}
 
-    extern "C" EXPORT_TAG const char *getName() {
-        return "modeldsid";
-    }
+extern "C" EXPORT_TAG const char *getName() {
+    return "modeldsid";
+}
 
-    extern "C" EXPORT_TAG unsigned getMajorVersion() {
-        return MAJOR_VERSION;
-    }
+extern "C" EXPORT_TAG unsigned getMajorVersion() {
+    return MAJOR_VERSION;
+}
 
-    extern "C" EXPORT_TAG unsigned getMinorVersion() {
-        return MINOR_VERSION;
-    }
+extern "C" EXPORT_TAG unsigned getMinorVersion() {
+    return MINOR_VERSION;
+}
 
-    extern "C" EXPORT_TAG void *createInstance() {
-        models::Modeldsid *m = new models::Modeldsid();
-        return((void *)m);
-    }
+extern "C" EXPORT_TAG void *createInstance() {
+    models::Modeldsid *m = new models::Modeldsid();
+    return((void *)m);
+}
 #endif // DSID_EXPORTS
 
 namespace models {
@@ -47,26 +47,26 @@ namespace models {
     static const Double dC4D3 = 4.0 / 3.0;
 
     Modeldsid::Modeldsid(): Bulk_(0.0),BulkB_(0.0),Shear_(0.0),Poisson_(0.0),
-              Kappa_PS0_(0.0),Lambda_PS0_(0.0),MM_(0.0),MPC_(0.0),MP1_(0.0),
-              MV_L_(0.0),MV_(0.0),EV_(0.0),EV_P_(0.0),MP_(0.0),MQ_(0.0),
-              T_now_(0.0),Suct_(0.0),Alpha_PS_(0.0),Alpha_0_(0.0),Alpha_1_(0.0),
-              Alpha_2_(0.0),Alpha_3_(0.0),Beta_L_(0.0),r_L_(0.0),T_ref_(0.0),
-              MPS0_(0.0),k_PS_(0.0),row_PS_(0.0),Kappa_PS_(0.0),Lambda_PS_(0.0),
-              Kappa_SP_(0.0),Kappa_SP0_(0.0),Alpha_SP_(0.0),Alpha_SS_(0.0),
-              P_ref_(0.0),Bulk_H_(0.0),DSuct_(0.0),MPC_ST_(0.0),MPC_T_(0.0),
-              MPS_(0.0),Nonass_(1.0),
-              Bulk_m_(0.0),Kappa_m_(0.0),MV_m_(0.0),MV_Ma_(0.0),
-              EV_m_(0.0),EV_Ma_(0.0),P0_m_(0.0),dP_(0.0),Bulk_T_(0.0),
-              f_SD_(0.0),f_SD0_(0.0),f_SD1_(0.0),n_SD_(0.0),
-              f_SI_(0.0),f_SI0_(0.0),f_SI1_(0.0),n_SI_(0.0),sd_(0.0),si_(0.0),
-              EV_PLC_(0.0),EV_PmM_(0.0),dEV_PmM_(0.0),MSC_(0.0),S11old_(0.0),dp_LC_(0.0),
-              dP_m_(0.0),a_1_(0.0),a_2_(0.0),alpha_m_(0.0),betha_m_(1.0),
-              ftanh_(0.0),f_SD2_(0.0),f_SD3_(0.0),f_SI2_(0.0),f_SI3_(0.0),cyc_(1.0),
-              Bulk_s_(0.0),Suct_m_(0.0),Suct_O_(0.0),sigM_(0.0),sigH_(0.0),
-              sigT_(0.0),dEVs_m_(0.0),dEVs_mtr_(0.0),PP0_(0.0),f_sc_(0.0),
-              dds11_(0.0),dds22_(0.0),dds33_(0.0),de11_(0.0),de22_(0.0),de33_(0.0),
-              Debug_(0.0),toughTime_(0.0),dFS_copy_(0.0),fs_frac_(1.0),chem_in_(0.0),
-              sig_miswell_(0.0),sig_tswell_(0.0),dP_m_tr_(0.0),dEV_m_(0.0){
+               Kappa_PS0_(0.0),Lambda_PS0_(0.0),MM_(0.0),MPC_(0.0),MP1_(0.0),
+               MV_L_(0.0),MV_(0.0),EV_(0.0),EV_P_(0.0),MP_(0.0),MQ_(0.0),
+               T_now_(0.0),Suct_(0.0),Alpha_PS_(0.0),Alpha_0_(0.0),Alpha_1_(0.0),
+               Alpha_2_(0.0),Alpha_3_(0.0),Beta_L_(0.0),r_L_(0.0),T_ref_(0.0),
+               MPS0_(0.0),k_PS_(0.0),row_PS_(0.0),Kappa_PS_(0.0),Lambda_PS_(0.0),
+               Kappa_SP_(0.0),Kappa_SP0_(0.0),Alpha_SP_(0.0),Alpha_SS_(0.0),
+               P_ref_(0.0),Bulk_H_(0.0),DSuct_(0.0),MPC_ST_(0.0),MPC_T_(0.0),
+               MPS_(0.0),Nonass_(1.0),
+               Bulk_m_(0.0),Kappa_m_(0.0),MV_m_(0.0),MV_Ma_(0.0),
+               EV_m_(0.0),EV_Ma_(0.0),P0_m_(0.0),dP_(0.0),Bulk_T_(0.0),
+               f_SD_(0.0),f_SD0_(0.0),f_SD1_(0.0),n_SD_(0.0),
+               f_SI_(0.0),f_SI0_(0.0),f_SI1_(0.0),n_SI_(0.0),sd_(0.0),si_(0.0),
+               EV_PLC_(0.0),EV_PmM_(0.0),dEV_PmM_(0.0),MSC_(0.0),S11old_(0.0),dp_LC_(0.0),
+               dP_m_(0.0),a_1_(0.0),a_2_(0.0),alpha_m_(0.0),betha_m_(1.0),
+               ftanh_(0.0),f_SD2_(0.0),f_SD3_(0.0),f_SI2_(0.0),f_SI3_(0.0),cyc_(1.0),
+               Bulk_s_(0.0),Suct_m_(0.0),Suct_O_(0.0),sigM_(0.0),sigH_(0.0),
+               sigT_(0.0),dEVs_m_(0.0),dEVs_mtr_(0.0),PP0_(0.0),f_sc_(0.0),
+               dds11_(0.0),dds22_(0.0),dds33_(0.0),de11_(0.0),de22_(0.0),de33_(0.0),
+               Debug_(0.0),toughTime_(0.0),dFS_copy_(0.0),fs_frac_(1.0),chem_in_(0.0),
+               sig_miswell_(0.0),sig_tswell_(0.0),dP_m_tr_(0.0),dEV_m_(0.0){
     }
 
     String Modeldsid::getProperties(void) const {
@@ -91,7 +91,6 @@ namespace models {
                L"dds11,dds22,dds33,de11,de22,de33,"
                L"Debug,toughTime,dFS_copy,fs_frac,chem_in,"
                L"sig_miswell,sig_tswell,dP_m_tr,dEV_m";
-
     }
 
     UInt Modeldsid::getMinorVersion() const {
