@@ -35,8 +35,11 @@ namespace models {
       // Optional
       virtual bool          supportsHystereticDamping() const { return(false); }
     private:
-      Double Bulk_,BulkB_,Shear_,Poisson_,Bulk0_,Poisson0_,a1_,a2_,a3_,a4_;
-      Double C0_,C1_,alpha_,Debug_;
+      Double Bulk_,BulkB_,Shear_,Poisson_,E0_,Poisson0_,a1_,a2_,a3_,a4_;
+      Double C0_,C1_,alpha_,Debug_,Omega_11_;
+      Double Omega_22_,Omega_33_,Omega_12_,Omega_23_,Omega_31_;
+      Double Epsid_11_,Epsid_22_,Epsid_33_,Epsid_12_,Epsid_23_;
+      Double Epsid_31_;
       Double Matdom[6][6],Omega[6],Epsid[6];
   };
 }

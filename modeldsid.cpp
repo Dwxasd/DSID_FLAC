@@ -37,6 +37,17 @@ extern "C" EXPORT_TAG void *createInstance() {
 }
 #endif // DSID_EXPORTS
 
+void effectiveStiffness(double (&Matdom)[6][6], const double (&Omega)[6], const double & E0_,
+                        const double & Poisson0_, const double & a1_, const double & a2_,
+                        const double & a3_, const double & a4_, const double & C0_,
+                        const double & C1_, const double & alpha_);
+
+void damageFuntion(double & fd, const double (&Sigma)[6], const double (&Omega)[6], const double & E0_,
+                   const double & Poisson0_, const double & a1_, const double & a2_,
+                   const double & a3_, const double & a4_, const double & C0_,
+                   const double & C1_, const double & alpha_, const int & ioptfd);
+
+
 namespace models {
     static const unsigned long mShearNow    = 0x01;
     // static const unsigned long mTensionNow  = 0x02;
@@ -46,14 +57,20 @@ namespace models {
     static const Double dC2D3 = 2.0 / 3.0;
     static const Double dC4D3 = 4.0 / 3.0;
 
-    Modeldsid::Modeldsid(): Bulk_(0.0),BulkB_(0.0),Shear_(0.0),Poisson_(0.0),Bulk0_(0.0),
+    Modeldsid::Modeldsid(): Bulk_(0.0),BulkB_(0.0),Shear_(0.0),Poisson_(0.0),E0_(0.0),
                Poisson0_(0.0),a1_(0.0),a2_(0.0),a3_(0.0),a4_(0.0),
-               C0_(0.0),C1_(0.0),alpha_(0.0),Debug_(0.0) {   }
+               C0_(0.0),C1_(0.0),alpha_(0.0),Debug_(0.0),Omega_11_(0.0),
+               Omega_22_(0.0),Omega_33_(0.0),Omega_12_(0.0),Omega_23_(0.0),Omega_31_(0.0),
+               Epsid_11_(0.0),Epsid_22_(0.0),Epsid_33_(0.0),Epsid_12_(0.0),Epsid_23_(0.0),
+               Epsid_31_(0.0) {   }
 
     String Modeldsid::getProperties(void) const {
-        return L"bulk,shear,bulk_bound,poisson,bulk0"
+        return L"bulk,shear,bulk_bound,poisson,E0"
                L"poisson0,a1,a2,a3,a4,"
-               L"c0,c1,alpha,debug";
+               L"c0,c1,alpha,debug,omega11,"
+               L"omega22,omega33,omega12,omega23,omega31,"
+               L"epsid11,epsid22,epsid33,epsid12,epsid23,"
+               L"epsid31";
 
     }
 
@@ -67,22 +84,37 @@ namespace models {
 
     Variant Modeldsid::getProperty(UInt ul) const {
         switch (ul) {
-            case 1:  return(Bulk_);
-            case 2:  return(Shear_);
-            case 3:  return(BulkB_);
-            case 4:  return(Poisson_);
-            case 5:  return(Bulk0_);
+            case 1:  return(Bulk_)    ;
+            case 2:  return(Shear_)   ;
+            case 3:  return(BulkB_)   ;
+            case 4:  return(Poisson_) ;
+            case 5:  return(E0_)   ;
 //
             case 6:  return(Poisson0_);
-            case 7:  return(a1_);
-            case 8:  return(a2_);
-            case 9:  return(a3_);
-            case 10: return(a4_);
+            case 7:  return(a1_)      ;
+            case 8:  return(a2_)      ;
+            case 9:  return(a3_)      ;
+            case 10: return(a4_)      ;
 //
-            case 11: return(C0_);
-            case 12: return(C1_);
-            case 13: return(alpha_);
-            case 14: return(Debug_);
+            case 11: return(C0_)      ;
+            case 12: return(C1_)      ;
+            case 13: return(alpha_)   ;
+            case 14: return(Debug_)   ;
+            case 15: return(Omega_11_);
+//
+            case 16: return(Omega_22_);
+            case 17: return(Omega_33_);
+            case 18: return(Omega_12_);
+            case 19: return(Omega_23_);
+            case 20: return(Omega_31_);
+//
+            case 21: return(Epsid_11_);
+            case 22: return(Epsid_22_);
+            case 23: return(Epsid_33_);
+            case 24: return(Epsid_12_);
+            case 25: return(Epsid_23_);
+//
+            case 26: return(Epsid_31_);
         }
         return(0.0);
     }
@@ -94,7 +126,7 @@ namespace models {
             case  2: Shear_       = p.toDouble();  break;
             case  3: BulkB_       = p.toDouble();  break;
             case  4: Poisson_     = p.toDouble();  break;
-            case  5: Bulk0_       = p.toDouble();  break;
+            case  5: E0_          = p.toDouble();  break;
             case  6: Poisson0_    = p.toDouble();  break;
             case  7: a1_          = p.toDouble();  break;
             case  8: a2_          = p.toDouble();  break;
@@ -104,6 +136,18 @@ namespace models {
             case 12: C1_          = p.toDouble();  break;
             case 13: alpha_       = p.toDouble();  break;
             case 14: Debug_       = p.toDouble();  break;
+            case 15: Omega_11_    = p.toDouble();  break;
+            case 16: Omega_22_    = p.toDouble();  break;
+            case 17: Omega_33_    = p.toDouble();  break;
+            case 18: Omega_12_    = p.toDouble();  break;
+            case 19: Omega_23_    = p.toDouble();  break;
+            case 20: Omega_31_    = p.toDouble();  break;
+            case 21: Epsid_11_    = p.toDouble();  break;
+            case 22: Epsid_22_    = p.toDouble();  break;
+            case 23: Epsid_33_    = p.toDouble();  break;
+            case 24: Epsid_12_    = p.toDouble();  break;
+            case 25: Epsid_23_    = p.toDouble();  break;
+            case 26: Epsid_31_    = p.toDouble();  break;
         }
     }
 
@@ -115,7 +159,7 @@ namespace models {
         Shear_      = em->Shear_   ;
         BulkB_      = em->BulkB_   ;
         Poisson_    = em->Poisson_ ;
-        Bulk0_      = em->Bulk0_   ;
+        E0_         = em->E0_      ;
         Poisson0_   = em->Poisson0_;
         a1_         = em->a1_      ;
         a2_         = em->a2_      ;
@@ -125,6 +169,19 @@ namespace models {
         C1_         = em->C1_      ;
         alpha_      = em->alpha_   ;
         Debug_      = em->Debug_   ;
+        Omega_11_   = em->Omega_11_;
+        Omega_22_   = em->Omega_22_;
+        Omega_33_   = em->Omega_33_;
+        Omega_12_   = em->Omega_12_;
+        Omega_23_   = em->Omega_23_;
+        Omega_31_   = em->Omega_31_;
+        Epsid_11_   = em->Epsid_11_;
+        Epsid_22_   = em->Epsid_22_;
+        Epsid_33_   = em->Epsid_33_;
+        Epsid_12_   = em->Epsid_12_;
+        Epsid_23_   = em->Epsid_23_;
+        Epsid_31_   = em->Epsid_31_;
+        
     }
 
     void Modeldsid::initialize(UByte dim,State *s) {
