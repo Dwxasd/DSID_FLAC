@@ -47,6 +47,32 @@ void damageFuntion(double & fd, const double (&Sigma)[6], const double (&Omega)[
                    const double & a3_, const double & a4_, const double & C0_,
                    const double & C1_, const double & alpha_, const int & ioptfd);
 
+void vectorToTensor(const double (&Vector)[6], double (&Tensor)[3][3], const double & Fact);
+
+void matP1(double (&P1)[6][6], const double (&Sigma)[6]);
+
+void Aik_Bkj(const double (&A)[6], const double (&B)[6], double (&C)[6]);
+
+void matP2(double (&P2)[6][6], const double (&Sigma)[6]);
+
+void dY_dSig(const double (&Sigma)[6], double (&dY_dSig)[6][6],const double & E0_,
+             const double & Poisson0_, const double & a1_, const double & a2_,
+             const double & a3_, const double & a4_, const double & C0_,
+             const double & C1_, const double & alpha_);
+
+void fd_Lam(const double (&Omega)[6], const double (&Sigma)[6], double (&Matdom)[6][6],const double & E0_,
+             const double & Poisson0_, const double & a1_, const double & a2_,
+             const double & a3_, const double & a4_, const double & C0_,
+             const double & C1_, const double & alpha_, double & H0,
+             double & Hp, double (&dG_dY)[6], double (&df_dSig)[6],
+             double (&temp)[6], const int & iopt);
+
+void Mat_dS_dOmega(double (&dS_dO)[6][6][6], const double & E0_,
+                   const double & Poisson0_, const double & a1_, const double & a2_,
+                   const double & a3_, const double & a4_, const double & C0_,
+                   const double & C1_, const double & alpha_);
+
+
 
 namespace models {
     static const unsigned long mShearNow    = 0x01;
