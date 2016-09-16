@@ -9,6 +9,13 @@
 #pragma once
 
 #include "C:\Program Files\Itasca\Flac3d500\pluginfiles\models\src\conmodel.h"
+#include "../mathLib/arithmetic.h"
+#include "../mathLib/r1Tensor.h"
+#include "../mathLib/r2Tensor.h"
+#include "../mathLib/r3Tensor.h"
+#include "../mathLib/errInfo.h"
+#include "../mathLib/gaussj.h"
+#include "../mathLib/eigen.h"
 
 namespace models {
   class Modeldsid : public ConstitutiveModel  {
@@ -40,7 +47,8 @@ namespace models {
       Double Omega_22_,Omega_33_,Omega_12_,Omega_23_,Omega_31_;
       Double Epsid_11_,Epsid_22_,Epsid_33_,Epsid_12_,Epsid_23_;
       Double Epsid_31_;
-      Double Matdom[6][6],Omega[6],Epsid[6];
+      r2Tensor<double> Matdom(6,6)
+      r1Tensor<double> Omega(6),Epsid(6);
   };
 }
 //EOF
