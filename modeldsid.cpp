@@ -11,6 +11,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <complex>
 #include <assert.h>
 #include "../mathLib/arithmetic.h"
 #include "../mathLib/r1Tensor.h"
@@ -54,15 +55,11 @@ void damageFuntion(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<do
                    const double & a3_, const double & a4_, const double & C0_,
                    const double & C1_, const double & alpha_, const int & ioptfd);
 
-void vectorToTensor(const r1Tensor<double> &Vector, r2Tensor<double> &Tensor, const double & Fact);
-
 void matP1(r2Tensor<double> &P1, const r1Tensor<double> &Sigma);
-
-void Aik_Bkj(const r1Tensor<double> &A, const r1Tensor<double> &B, r1Tensor<double> &C);
 
 void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma);
 
-void dY_dSig(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,const double & E0_,
+void dY_dSigFunction(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,const double & E0_,
              const double & Poisson0_, const double & a1_, const double & a2_,
              const double & a3_, const double & a4_, const double & C0_,
              const double & C1_, const double & alpha_);
@@ -807,60 +804,60 @@ void effectiveStiffness(r2Tensor<double> &Matdom, const r1Tensor<double> &Omega,
      r2Tensor<double> MatS(ntens,ntens,zero);
      Matdom = MatS;
 
-       trOmega = Omega[1] + Omega[2] + Omega[3];
+       trOmega = Omega[0] + Omega[1] + Omega[2];
        b1 = (1. + Poisson0_)/E0_/2.;
        b2 = Poisson0_/E0_;
 
        coe1 = 2.;
        coe2 = 4.;
 
-       MatS[1][1]=2.*b1-b2+2.*a1_*trOmega+2.*(a2_+a3_)*Omega[1]+2.*a4_*trOmega;
-       MatS[1][2]=-b2+2.*a1_*trOmega+a3_*(Omega[1]+Omega[2]);
-       MatS[1][3]=-b2+2.*a1_*trOmega+a3_*(Omega[3]+Omega[1]);
-       MatS[1][4]=coe1*(a2_*Omega[4]+a3_*Omega[4]);
+       MatS[0][0]=2.*b1-b2+2.*a1_*trOmega+2.*(a2_+a3_)*Omega[0]+2.*a4_*trOmega;
+       MatS[0][1]=-b2+2.*a1_*trOmega+a3_*(Omega[0]+Omega[1]);
+       MatS[0][2]=-b2+2.*a1_*trOmega+a3_*(Omega[2]+Omega[0]);
+       MatS[0][3]=coe1*(a2_*Omega[3]+a3_*Omega[3]);
 
+       MatS[1][0]=MatS[0][1];
+       MatS[1][1]=2.*b1-b2+2.*a1_*trOmega+2.*(a2_+a3_)*Omega[1]+2.*a4_*trOmega;
+       MatS[1][2]=-b2+2.*a1_*trOmega+a3_*(Omega[2]+Omega[1]);
+       MatS[1][3]=coe1*(a2_*Omega[3]+a3_*Omega[3]);
+
+       MatS[2][0]=MatS[0][2];
        MatS[2][1]=MatS[1][2];
        MatS[2][2]=2.*b1-b2+2.*a1_*trOmega+2.*(a2_+a3_)*Omega[2]+2.*a4_*trOmega;
-       MatS[2][3]=-b2+2.*a1_*trOmega+a3_*(Omega[3]+Omega[2]);
-       MatS[2][4]=coe1*(a2_*Omega[4]+a3_*Omega[4]);
+       MatS[2][3]=coe1*(a3_*Omega[3]);
 
-       MatS[3][1]=MatS[1][3];
-       MatS[3][2]=MatS[2][3];
-       MatS[3][3]=2.*b1-b2+2.*a1_*trOmega+2.*(a2_+a3_)*Omega[3]+2.*a4_*trOmega;
-       MatS[3][4]=coe1*(a3_*Omega[4]);
-
-       MatS[4][1]=MatS[1][4];
-       MatS[4][2]=MatS[2][4];      
-       MatS[4][3]=MatS[3][4];       
-       MatS[4][4]=coe2*(b1+0.5*a2_*(Omega[1]+Omega[2])+a4_*trOmega);
+       MatS[3][0]=MatS[0][3];
+       MatS[3][1]=MatS[1][3];      
+       MatS[3][2]=MatS[2][3];       
+       MatS[3][3]=coe2*(b1+0.5*a2_*(Omega[0]+Omega[1])+a4_*trOmega);
  
        
 //       IF (NTENS.EQ.6] THEN
+         MatS[0][4]=coe1*(a3_*Omega[4]);
+         MatS[0][5]=coe1*(a2_*Omega[5]+a3_*Omega[5]);
+
+         MatS[1][4]=coe1*(a2_*Omega[4]+a3_*Omega[4]);
          MatS[1][5]=coe1*(a3_*Omega[5]);
-         MatS[1][6]=coe1*(a2_*Omega[6]+a3_*Omega[6]);
 
+         MatS[2][4]=coe1*(a2_*Omega[4]+a3_*Omega[4]);
          MatS[2][5]=coe1*(a2_*Omega[5]+a3_*Omega[5]);
-         MatS[2][6]=coe1*(a3_*Omega[6]);
 
-         MatS[3][5]=coe1*(a2_*Omega[5]+a3_*Omega[5]);
-         MatS[3][6]=coe1*(a2_*Omega[6]+a3_*Omega[6]);
+         MatS[3][4]=coe2*0.5*a2_*Omega[5];
+         MatS[3][5]=coe2*0.5*a2_*Omega[4];
 
-         MatS[4][5]=coe2*0.5*a2_*Omega[6];
-         MatS[4][6]=coe2*0.5*a2_*Omega[5];
+         MatS[4][0]=MatS[0][4];
+         MatS[4][1]=MatS[1][4];      
+         MatS[4][2]=MatS[2][4];       
+         MatS[4][3]=MatS[3][4];
+         MatS[4][4]=coe2*(b1+0.5*a2_*(Omega[2]+Omega[1])+a4_*trOmega);
+         MatS[4][5]=coe2*0.5*a2_*Omega[3];
 
-         MatS[5][1]=MatS[1][5];
-         MatS[5][2]=MatS[2][5];      
-         MatS[5][3]=MatS[3][5];       
+         MatS[5][0]=MatS[0][5];
+         MatS[5][1]=MatS[1][5];       
+         MatS[5][2]=MatS[2][5];       
+         MatS[5][3]=MatS[3][5];
          MatS[5][4]=MatS[4][5];
-         MatS[5][5]=coe2*(b1+0.5*a2_*(Omega[3]+Omega[2])+a4_*trOmega);
-         MatS[5][6]=coe2*0.5*a2_*Omega[4];
-
-         MatS[6][1]=MatS[1][6];
-         MatS[6][2]=MatS[2][6];       
-         MatS[6][3]=MatS[3][6];       
-         MatS[6][4]=MatS[4][6];
-         MatS[6][5]=MatS[5][6];
-         MatS[6][6]=coe2*(b1+0.5*a2_*(Omega[3]+Omega[1])+a4_*trOmega);
+         MatS[5][5]=coe2*(b1+0.5*a2_*(Omega[2]+Omega[0])+a4_*trOmega);
 
 
 //       ENDIF
@@ -932,18 +929,152 @@ void damageFuntion(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<do
 
 }
 
-void vectorToTensor(const r1Tensor<double> &Vector, r2Tensor<double> &Tensor, const double & Fact);
+void matP1(r2Tensor<double> &P1, const r1Tensor<double> &Sigma) {
+    int ntens = Sigma.size();
+    int m=3;
+    r1Tensor<double> s(m), anan1(ntens), anan2(ntens), anan3(ntens);
+    r2Tensor<double> sigma1(m,m), sigma0(m,m);
+    const double one=1.,two=2.,tol=1e-6;
+    vectorToTensor(Sigma, sigma1, one);
+    sigma0 = sigma1;
+    Unsymmeig h(sigma0);
+    for (int i=0; i<m; i++) {
+        if (abs(h.wri[i].real())<tol) h.wri[i].real()=0.;
+    }
+    for (int i=0; i<m; i++) {
+        if (h.wri[i].real()>=0){
+            s[i] = 1.;
+        } else {
+            s[i] = -1.;
+        }
+    }
+    for (int i=0; i<m; i++) {
+        anan1[i] = h.zz[i][0]*h.zz[i][0];
+        anan2[i] = h.zz[i][1]*h.zz[i][1];
+        anan3[i] = h.zz[i][2]*h.zz[i][2];
+    }
 
-void matP1(r2Tensor<double> &P1, const r1Tensor<double> &Sigma);
+    anan1[3] = h.zz[0][0]*h.zz[1][0];
+    anan2[3] = h.zz[0][1]*h.zz[1][1];
+    anan3[3] = h.zz[0][2]*h.zz[1][2];
 
-void Aik_Bkj(const r1Tensor<double> &A, const r1Tensor<double> &B, r1Tensor<double> &C);
+    anan1[4] = h.zz[1][0]*h.zz[2][0];
+    anan2[4] = h.zz[1][1]*h.zz[2][1];
+    anan3[4] = h.zz[1][2]*h.zz[2][2];
+
+    anan1[5] = h.zz[2][0]*h.zz[0][0];
+    anan2[5] = h.zz[2][1]*h.zz[0][1];
+    anan3[5] = h.zz[2][2]*h.zz[0][2];
+
+    for (int i=0; i<m; i++) {
+        for (int j=0; j<m; j++) {
+            P1[i][j] = s[0] * anan1[i]*anan1[j] +
+                       s[1] * anan2[i]*anan2[j] +
+                       s[2] * anan3[i]*anan3[j];
+        }
+    }
+}
 
 void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma);
+    int ntens = Sigma.size();
+    int m=3;i
+    double res;
+    r1Tensor<double> s(m), anan1(ntens), anan2(ntens), anan3(ntens);
+    r2Tensor<double> sigma1(m,m), sigma0(m,m);
+    const double one=1.,two=2.,tol=1e-6;
+    vectorToTensor(Sigma, sigma1, one);
+    sigma0 = sigma1;
+    Unsymmeig h(sigma0);
+    //for (int i=0; i<m; i++) {
+    //    if (abs(h.wri[i].real())<tol) h.wri[i].real()=0.;
+    //}
+    for (int i=0; i<m; i++) {
+        res = h.wri[i].real()- MIN(h.wri[0].real(),MIN(h.wri[1].real(),h.wri[2].real()));
+        if (res>0.){
+            s[i] = 1.;
+        } else {
+            s[i] = 0.;
+        }
+    }
+    for (int i=0; i<m; i++) {
+        anan1[i] = h.zz[i][0]*h.zz[i][0];
+        anan2[i] = h.zz[i][1]*h.zz[i][1];
+        anan3[i] = h.zz[i][2]*h.zz[i][2];
+    }
 
-void dY_dSig(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,const double & E0_,
+    anan1[3] = h.zz[0][0]*h.zz[1][0];
+    anan2[3] = h.zz[0][1]*h.zz[1][1];
+    anan3[3] = h.zz[0][2]*h.zz[1][2];
+
+    anan1[4] = h.zz[1][0]*h.zz[2][0];
+    anan2[4] = h.zz[1][1]*h.zz[2][1];
+    anan3[4] = h.zz[1][2]*h.zz[2][2];
+
+    anan1[5] = h.zz[2][0]*h.zz[0][0];
+    anan2[5] = h.zz[2][1]*h.zz[0][1];
+    anan3[5] = h.zz[2][2]*h.zz[0][2];
+
+    for (int i=0; i<m; i++) {
+        for (int j=0; j<m; j++) {
+            P2[i][j] = s[0] * anan1[i]*anan1[j] +
+                       s[1] * anan2[i]*anan2[j] +
+                       s[2] * anan3[i]*anan3[j];
+        }
+    }
+
+void dY_dSigFunction(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,const double & E0_,
              const double & Poisson0_, const double & a1_, const double & a2_,
              const double & a3_, const double & a4_, const double & C0_,
-             const double & C1_, const double & alpha_);
+             const double & C1_, const double & alpha_) {
+    int ntens = Sigma.size();
+    double trSig;
+    trSig = Sigma[0]+Sigma[1]+Sigma[2];
+    dY_dSig[0][0]=2.*a1_*trSig+2.*a2_*Sigma[0]+a3_*(Sigma[0]+trSig)+2.*a4_*Sigma[0];
+    dY_dSig[0][1]=2.*a1_*trSig+a3_*Sigma[0]+2.*a4_*Sigma[1];
+    dY_dSig[0][2]=2.*a1_*trSig+a3_*Sigma[0]+2.*a4_*Sigma[2];
+    dY_dSig[0][3]=a2_*Sigma[3]+2.*a4_*Sigma[3];
+                                                                                   
+    dY_dSig[1][0]=2.*a1_*trSig+a3_*Sigma[1]+2.*a4_*Sigma[0];
+    dY_dSig[1][1]=2.*a1_*trSig+2.*a2_*Sigma[1]+a3_*(Sigma[1]+trSig)+2.*a4_*Sigma[1];
+    dY_dSig[1][2]=2.*a1_*trSig+a3_*Sigma[1]+2.*a4_*Sigma[2];
+    dY_dSig[1][3]=a2_*Sigma[3]+2.*a4_*Sigma[3];
+                                                                                   
+    dY_dSig[2][0]=2.*a1_*trSig+a3_*Sigma[2]+2.*a4_*Sigma[0];
+    dY_dSig[2][1]=2.*a1_*trSig+a3_*Sigma[2]+2.*a4_*Sigma[1];
+    dY_dSig[2][2]=2.*a1_*trSig+2.*a2_*Sigma[2]+a3_*(Sigma[2]+trSig)+2.*a4_*Sigma[2];
+    dY_dSig[2][3]=2.*a4_*Sigma[3];
+                                                                                   
+    dY_dSig[3][0]=a2_*Sigma[3]+a3_*Sigma[3];
+    dY_dSig[3][1]=a2_*Sigma[3]+a3_*Sigma[3];
+    dY_dSig[3][2]=a3_*Sigma[3];
+    dY_dSig[3][3]=0.5*a2_*(Sigma[0]+Sigma[1])+0.5*a3_*trSig;
+                                                                                   
+    dY_dSig[0][4]=2.*a4_*Sigma[4];
+    dY_dSig[0][5]=a2_*Sigma[5]+2.*a4_*Sigma[5];
+                                                                                   
+    dY_dSig[1][4]=a2_*Sigma[4]+2.*a4_*Sigma[4];
+    dY_dSig[1][5]=2.*a4_*Sigma[5];
+                                                                                   
+    dY_dSig[2][4]=a2_*Sigma[4]+2.*a4_*Sigma[4];
+    dY_dSig[2][5]=a2_*Sigma[5]+2.*a4_*Sigma[5];
+                                                                                   
+    dY_dSig[3][4]=0.5*a2_*Sigma[5];
+    dY_dSig[3][5]=0.5*a2_*Sigma[4];
+                                                                                   
+    dY_dSig[4][0]=a3_*Sigma[4];
+    dY_dSig[4][1]=a2_*Sigma[4]+a3_*Sigma[4];
+    dY_dSig[4][2]=a2_*Sigma[4]+a3_*Sigma[4];
+    dY_dSig[4][3]=dY_dSig[3][4];
+    dY_dSig[4][4]=0.5*a2_*(Sigma[1]+Sigma[2])+0.5*a3_*trSig;
+    dY_dSig[4][5]=0.5*a2_*Sigma[3];
+                                                                                   
+    dY_dSig[5][0]=a2_*Sigma[5]+a3_*Sigma[5];
+    dY_dSig[5][1]=a3_*Sigma[5];
+    dY_dSig[5][2]=a2_*Sigma[5]+a3_*Sigma[5];
+    dY_dSig[5][3]=dY_dSig[3][5];
+    dY_dSig[5][4]=dY_dSig[4][5];
+    dY_dSig[5][5]=0.5*a2_*(Sigma[2]+Sigma[0])+0.5*a3_*trSig;
+}
 
 // SUB FD_LAM
 void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &Sigma, r2tensor<double> &Matdom,const double & E0_,
@@ -951,7 +1082,220 @@ void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &S
              const double & a3_, const double & a4_, const double & C0_,
              const double & C1_, const double & alpha_, double & H0,
              double & Hp, r1Tensor<double> &dG_dY, r1Tensor<double> &df_dSig,
-             r1Tensor<double> &temp, const int & iopt);
+             r1Tensor<double> &temp, const int & iopt){
+    int ntens = Omega.size();
+    double zero=0.;
+    double trSigma, trOmega, trSigSig, P1yd1e, f1f1, f2f2;
+    r1Tensor<double> e(ntens), yd1(ntens), SigSig(ntens), f1ij(ntens),f2ij(ntens);
+    r1Tensor<double> P1yd1(ntens), f2p2(ntens), ep1(ntens),df_dY(ntens), df_dOmega(ntens);
+    r1Tensor<double> f1p3(ntens),zeros(ntens,zero),temp1(ntens); 
+    r2Tensor<double> P1(ntens,ntens), dY_dSig(ntens,ntens),eep1(ntens,ntens);
+    r2Tensor<double> P3(ntens,ntens), P2(ntens,ntens), temp2(ntens,ntens);
+    r3Tensor<double> dS_dOmega; 
+
+    //DATA ONE,TWO,HALF / 1.0D0,2.0D0,0.5D0 /
+
+    for (int i=0; i<ntens; i++) {
+        if (i<3) {
+            e[i]=1.;
+        } else {
+            e[i]=0.;
+        }
+    }
+
+    trSigma = Sigma[0]+Sigma[1]+Sigma[2];
+    trOmega = Omega[0]+Omega[1]+Omega[2];
+
+    Aik_Bkj(Sigma,Sigma,SigSig);
+
+    trSigSig =SigSig[0]+SigSig[1]+SigSig[2];
+
+    for (int i=0; i<ntens; i++) {
+        yd1[i]= a1_*trSigma**2.*e[i]+a2_*SigSig[i]+
+              a3_*trSigma*Sigma[i]+a4_*trSigSig*e[i];
+    }
+
+    dY_dSigFunction(Sigma,dY_dSig,
+            E0_,Poisson0_,a1_,a2_,a3_,a4_,C0_,C1_,alpha_);
+    matP1(P1,Sigma);
+
+    matP2(P2,Sigma);
+    for (int i=0;i<ntens;i++){
+        P1yd1[i]=0.;
+        for (int j=0;j<ntens;j++){
+            if (j<3) {
+                P1yd1[i]+=P1[i][j]*yd1[j];
+            } else {
+                P1yd1[i]+=2.*P1[i][j]*yd1[j];
+            }
+         }   
+    }
+    P1yd1e=P1yd1[0]+P1yd1[1]+P1yd1[2];
+
+    for (int i=0; i<ntens; i++) {
+        f2ij[i]=0.;
+        for (int j=0; j<ntens; j++) {
+            if (j<3) {
+                f2ij[i]+=P2[i][j]*yd1[j];
+            } else {
+                f2ij[i]+=2.*P2[i][j]*yd1[j];
+            }
+         }
+     }
+
+    for (int i=0; i<ntens; i++){
+        f2p2[i]=0.;
+        for (int j=0;j<ntens;j++){
+            if (j<3) {   
+                f2p2[i]+=P2[j][i]*f2ij[j];
+            } else {
+                f2p2[i]+=2.*P2[j][i]*f2ij[j];
+            }  
+         }
+     }
+      
+     f2f2=0.;
+     for (int i=0; i<ntens; i++) {
+         if (i<3) {
+             f2f2+=f2ij[i]*f2ij[i];
+         } else {
+             f2f2+=2.*f2ij[i]*f2ij[i];
+         }  
+     }
+
+    for (int i=0; i<ntens; i++) {
+        ep1[i]=0.;
+        for (int j=0; j<ntens; j++) {
+            if (j<3) {
+                ep1[i]+=P1[j][i]*e[j];
+            } else {
+                ep1[i]+=2.*P1[j][i]*e[j];
+            }  
+        }
+    }
+     
+    for (int i=0; i<ntens; i++) {
+        for (int j=0; j<ntens; j++) {
+            eep1[i][j]=e[i]*ep1[j];
+        }
+    }
+
+    for (int i=0; i<ntens; i++) {
+        for (int j=0; j<ntens; j++) {
+            P3[i][j]=P1[i][j]-1./3.*eep1[i][j];
+        }
+    }
+
+    for (int i=0; i<ntens; i++) {
+        f1ij[i]=P1yd1[i]-1./3.*P1yd1e*e[i];
+        df_dOmega[i]=-C1_*e[i];
+        if (f2f2 == 0.) {
+            dG_dY[i]=0.;
+        } else {  
+            dG_dY[i]=f2p2[i]/sqrt(2.0*f2f2);
+        }
+    }
+
+      
+    for (int i=0; i<ntens; i++) {
+        f1p3[i]=0.;
+        for (int j=0; j<ntens; j++) {
+            if (j<3) {
+                f1p3[i]+=f1ij[j]*P3[j][i];
+            } else {
+                f1p3[i]+=2.*f1ij[j]*P3[j][i];
+            }  
+        }
+    }
+      
+    f1f1=0.
+    for (int i=0; i<ntens; i++) {
+        if (i<3) {
+            f1f1+=f1ij[i]*f1ij[i];
+        } else {
+            f1f1+=2.*f1ij[i]*f1ij[i];
+        }  
+    }
+
+    for (int i=0; i<ntens; i++) {
+        df_dY[i]=f1p3[i]/sqrt(2.*f1f1)+alpha_*ep1[i];
+    }
+     
+    for (int i=0; i<ntens; i++) {
+        df_dSig[i]=0.;
+        for (int j=0; j<ntens; j++) {
+            if (j<3) {
+                df_dSig[i]+=df_dY[j]*dY_dSig[j][i];
+            } else {
+                df_dSig[i]+=2.*df_dY[j]*dY_dSig[j][i];
+            }  
+        }
+    }
+
+      
+    HP=0.;
+    for (int i=0; i<ntens; i++) {
+        if(i<3){
+            HP+=df_dOmega[i]*dG_dY[i];
+        } else {
+            HP+=2.*df_dOmega[i]*dG_dY[i];
+        } 
+    }
+
+    H0=0.;
+
+    Mat_dS_dOmega(dS_dOmega,E0_,Poisson0_,a1_,a2_,a3_,a4_,C0_,C1_,alpha_);
+
+    for (int i=0; i<ntens; i++) {
+        for (int j=0; j<ntens; j++) {
+            temp2[i][j]=0.;
+            for (int k=0; k<ntens; k++) {
+                if (k<3) {
+                    temp2[i][j]=temp2[i][j]+Sigma[k]*dS_dOmega[k][i][j];
+                } else {
+                    temp2[i][j]=temp2[i][j]+2.*Sigma[k]*dS_dOmega[k][i][j];
+                }
+            }
+        }
+    }
+
+    for (int i=0; i<ntens; i++) {
+        temp1[i]=0.;
+        for (int j=0; j<ntens; j++) {
+            if (j<3){
+                temp1[i]+=temp2[i][j]*dG_dY[j];
+            } else {
+                temp1[i]+=2.0*temp2[i][j]*dG_dY[j];
+            }
+        }
+    }
+
+    for (int i=0; i<ntens; i++) {
+         temp1[i]+=df_dSig[i];
+    }
+     
+    if(iopt.eq.1) {
+      effectiveStiffness(Matdom,Omega,
+               E0_,Poisson0_,a1_,a2_,a3_,a4_,C0_,C1_,alpha_);
+    }
+    for (int i=0; i<ntens; i++) {
+        temp[i]=0.;
+        for (int j=0; j<ntens; j++) {
+            if(j<3){
+                temp[i]+=Matdom[i][j]*temp1[j];
+            } else {
+                temp[i]+=2.*Matdom[i][j]*temp1[j];
+            } 
+        }
+    }
+    for (int i=0; i<ntens; i++) {
+        if(i<3){
+            H0+=df_dSig[i]*temp[i];
+        } else {
+            H0+=2.*df_dSig[i]*temp[i];
+        } 
+    }
+}
 
 void Mat_dS_dOmega(r3Tensor<double> &dS_dO, const double & E0_,
                    const double & Poisson0_, const double & a1_, const double & a2_,
@@ -959,271 +1303,271 @@ void Mat_dS_dOmega(r3Tensor<double> &dS_dO, const double & E0_,
                    const double & C1_, const double & alpha_){
 
 // ------- page 1 -------
-      dS_dO[1][1][1]=2.*a1_+2.*a2_+2.*a3_+2.*a4_;  
-      dS_dO[1][2][1]=2.*a1_+a3_                 ;
-      dS_dO[1][3][1]=2.*a1_+a3_                 ;
-      dS_dO[1][4][1]=0.                         ;
+      dS_dO[0][0][0]=2.*a1_+2.*a2_+2.*a3_+2.*a4_;  
+      dS_dO[0][1][0]=2.*a1_+a3_                 ;
+      dS_dO[0][2][0]=2.*a1_+a3_                 ;
+      dS_dO[0][3][0]=0.                         ;
                                                   
+      dS_dO[1][0][0]=dS_dO[0][1][0]             ;
+      dS_dO[1][1][0]=2.*a1_+2.*a4_              ;
+      dS_dO[1][2][0]=2.*a1_                     ;
+      dS_dO[1][3][0]=0.                         ;
+                                                  
+      dS_dO[2][0][0]=dS_dO[0][2][0]             ;
+      dS_dO[2][1][0]=dS_dO[1][2][0]             ;
+      dS_dO[2][2][0]=2.*a1_+2.*a4_              ;
+      dS_dO[2][3][0]=0.                         ;
+                                                  
+      dS_dO[3][0][0]=dS_dO[0][3][0]             ;
+      dS_dO[3][1][0]=dS_dO[1][3][0]             ;
+      dS_dO[3][2][0]=dS_dO[2][3][0]             ;
+      dS_dO[3][3][0]=0.5*a2_+a4_                ;
+                                                  
+//      IF[NTENS.EQ.6]THEN                        
+      dS_dO[0][4][0]=0.                         ;
+      dS_dO[0][5][0]=0.                         ;
+      dS_dO[1][4][0]=0.                         ;
+      dS_dO[1][5][0]=0.                         ;
+      dS_dO[2][4][0]=0.                         ;
+      dS_dO[2][5][0]=0.                         ;
+      dS_dO[3][4][0]=0.                         ;
+      dS_dO[3][5][0]=0.                         ;
+      dS_dO[4][0][0]=dS_dO[0][4][0]             ;
+      dS_dO[4][1][0]=dS_dO[1][4][0]             ;
+      dS_dO[4][2][0]=dS_dO[2][4][0]             ;
+      dS_dO[4][3][0]=dS_dO[3][4][0]             ;
+      dS_dO[4][4][0]=a4_                        ;
+      dS_dO[4][5][0]=0.                         ;
+                                                  
+      dS_dO[5][0][0]=dS_dO[0][5][0]             ;
+      dS_dO[5][1][0]=dS_dO[1][5][0]             ;
+      dS_dO[5][2][0]=dS_dO[2][5][0]             ;
+      dS_dO[5][3][0]=dS_dO[3][5][0]             ;
+      dS_dO[5][4][0]=dS_dO[4][5][0]             ;
+      dS_dO[5][5][0]=0.5*a2_+a4_                ;
+//      ENDIF                                     
+                                                  
+// ------- page 2 -------                       --
+      dS_dO[0][0][1]=2.*a1_+2.*a4_              ;
+      dS_dO[0][1][1]=2.*a1_+a3_                 ;
+      dS_dO[0][2][1]=2.*a1_                     ;
+      dS_dO[0][3][1]=0.                         ;
+                                                  
+      dS_dO[1][0][1]=dS_dO[0][1][1]             ;
+      dS_dO[1][1][1]=2.*a1_+2.*a2_+2.*a3_+2.*a4_;
+      dS_dO[1][2][1]=2.*a1_+a3_                 ;
+      dS_dO[1][3][1]=0.                         ;
+                                                  
+      dS_dO[2][0][1]=dS_dO[0][2][1]             ;
       dS_dO[2][1][1]=dS_dO[1][2][1]             ;
       dS_dO[2][2][1]=2.*a1_+2.*a4_              ;
-      dS_dO[2][3][1]=2.*a1_                     ;
-      dS_dO[2][4][1]=0.                         ;
+      dS_dO[2][3][1]=0.                         ;
                                                   
+      dS_dO[3][0][1]=dS_dO[0][3][1]             ;
       dS_dO[3][1][1]=dS_dO[1][3][1]             ;
       dS_dO[3][2][1]=dS_dO[2][3][1]             ;
-      dS_dO[3][3][1]=2.*a1_+2.*a4_              ;
-      dS_dO[3][4][1]=0.                         ;
+      dS_dO[3][3][1]=0.5*a2_+a4_                ;
                                                   
+//      IF[NTENS.EQ.6]THEN                        
+      dS_dO[0][4][1]=0.                         ;
+      dS_dO[0][5][1]=0.                         ;
+      dS_dO[1][4][1]=0.                         ;
+      dS_dO[1][5][1]=0.                         ;
+      dS_dO[2][4][1]=0.                         ;
+      dS_dO[2][5][1]=0.                         ;
+      dS_dO[3][4][1]=0.                         ;
+      dS_dO[3][5][1]=0.                         ;
+      dS_dO[4][0][1]=dS_dO[0][4][1]             ;
       dS_dO[4][1][1]=dS_dO[1][4][1]             ;
       dS_dO[4][2][1]=dS_dO[2][4][1]             ;
       dS_dO[4][3][1]=dS_dO[3][4][1]             ;
       dS_dO[4][4][1]=0.5*a2_+a4_                ;
-                                                  
-//      IF[NTENS.EQ.6]THEN                        
-      dS_dO[1][5][1]=0.                         ;
-      dS_dO[1][6][1]=0.                         ;
-      dS_dO[2][5][1]=0.                         ;
-      dS_dO[2][6][1]=0.                         ;
-      dS_dO[3][5][1]=0.                         ;
-      dS_dO[3][6][1]=0.                         ;
       dS_dO[4][5][1]=0.                         ;
-      dS_dO[4][6][1]=0.                         ;
+                                                  
+      dS_dO[5][0][1]=dS_dO[0][5][1]             ;
       dS_dO[5][1][1]=dS_dO[1][5][1]             ;
       dS_dO[5][2][1]=dS_dO[2][5][1]             ;
       dS_dO[5][3][1]=dS_dO[3][5][1]             ;
       dS_dO[5][4][1]=dS_dO[4][5][1]             ;
-      dS_dO[5][5][1]=a4_                        ;
-      dS_dO[5][6][1]=0.                         ;
-                                                  
-      dS_dO[6][1][1]=dS_dO[1][6][1]             ;
-      dS_dO[6][2][1]=dS_dO[2][6][1]             ;
-      dS_dO[6][3][1]=dS_dO[3][6][1]             ;
-      dS_dO[6][4][1]=dS_dO[4][6][1]             ;
-      dS_dO[6][5][1]=dS_dO[5][6][1]             ;
-      dS_dO[6][6][1]=0.5*a2_+a4_                ;
+      dS_dO[5][5][1]=0.5*a2_+a4_                ;
 //      ENDIF                                     
                                                   
-// ------- page 2 -------                       --
+// ------- page 3 -------                       --
+      dS_dO[0][0][2]=2.*a1_+2.*a4_              ;
+      dS_dO[0][1][2]=2.*a1_                     ;
+      dS_dO[0][2][2]=2.*a1_+a3_                 ;
+      dS_dO[0][3][2]=0.                         ;
+                                                  
+      dS_dO[1][0][2]=dS_dO[0][1][2]             ;
       dS_dO[1][1][2]=2.*a1_+2.*a4_              ;
       dS_dO[1][2][2]=2.*a1_+a3_                 ;
-      dS_dO[1][3][2]=2.*a1_                     ;
-      dS_dO[1][4][2]=0.                         ;
+      dS_dO[1][3][2]=0.                         ;
                                                   
+      dS_dO[2][0][2]=dS_dO[0][2][2]             ;
       dS_dO[2][1][2]=dS_dO[1][2][2]             ;
       dS_dO[2][2][2]=2.*a1_+2.*a2_+2.*a3_+2.*a4_;
-      dS_dO[2][3][2]=2.*a1_+a3_                 ;
-      dS_dO[2][4][2]=0.                         ;
+      dS_dO[2][3][2]=0.                         ;
                                                   
+      dS_dO[3][0][2]=dS_dO[0][3][2]             ;
       dS_dO[3][1][2]=dS_dO[1][3][2]             ;
       dS_dO[3][2][2]=dS_dO[2][3][2]             ;
-      dS_dO[3][3][2]=2.*a1_+2.*a4_              ;
-      dS_dO[3][4][2]=0.                         ;
+      dS_dO[3][3][2]=a4_                        ;
                                                   
+//      IF[NTENS.EQ.6]THEN                        
+      dS_dO[0][4][2]=0.                         ;
+      dS_dO[0][5][2]=0.                         ;
+      dS_dO[1][4][2]=0.                         ;
+      dS_dO[1][5][2]=0.                         ;
+      dS_dO[2][4][2]=0.                         ;
+      dS_dO[2][5][2]=0.                         ;
+      dS_dO[3][4][2]=0.                         ;
+      dS_dO[3][5][2]=0.                         ;
+      dS_dO[4][0][2]=dS_dO[0][4][2]             ;
       dS_dO[4][1][2]=dS_dO[1][4][2]             ;
       dS_dO[4][2][2]=dS_dO[2][4][2]             ;
       dS_dO[4][3][2]=dS_dO[3][4][2]             ;
       dS_dO[4][4][2]=0.5*a2_+a4_                ;
-                                                  
-//      IF[NTENS.EQ.6]THEN                        
-      dS_dO[1][5][2]=0.                         ;
-      dS_dO[1][6][2]=0.                         ;
-      dS_dO[2][5][2]=0.                         ;
-      dS_dO[2][6][2]=0.                         ;
-      dS_dO[3][5][2]=0.                         ;
-      dS_dO[3][6][2]=0.                         ;
       dS_dO[4][5][2]=0.                         ;
-      dS_dO[4][6][2]=0.                         ;
+                                                  
+      dS_dO[5][0][2]=dS_dO[0][5][2]             ;
       dS_dO[5][1][2]=dS_dO[1][5][2]             ;
       dS_dO[5][2][2]=dS_dO[2][5][2]             ;
       dS_dO[5][3][2]=dS_dO[3][5][2]             ;
       dS_dO[5][4][2]=dS_dO[4][5][2]             ;
       dS_dO[5][5][2]=0.5*a2_+a4_                ;
-      dS_dO[5][6][2]=0.                         ;
-                                                  
-      dS_dO[6][1][2]=dS_dO[1][6][2]             ;
-      dS_dO[6][2][2]=dS_dO[2][6][2]             ;
-      dS_dO[6][3][2]=dS_dO[3][6][2]             ;
-      dS_dO[6][4][2]=dS_dO[4][6][2]             ;
-      dS_dO[6][5][2]=dS_dO[5][6][2]             ;
-      dS_dO[6][6][2]=0.5*a2_+a4_                ;
 //      ENDIF                                     
                                                   
-// ------- page 3 -------                       --
-      dS_dO[1][1][3]=2.*a1_+2.*a4_              ;
-      dS_dO[1][2][3]=2.*a1_                     ;
-      dS_dO[1][3][3]=2.*a1_+a3_                 ;
-      dS_dO[1][4][3]=0.                         ;
+// ------- page 4 -------                       --
+      dS_dO[0][0][3]=0.                         ;
+      dS_dO[0][1][3]=0.                         ;
+      dS_dO[0][2][3]=0.                         ;
+      dS_dO[0][3][3]=0.5*a2_+0.5*a3_            ;
                                                   
+      dS_dO[1][0][3]=dS_dO[0][1][3]             ;
+      dS_dO[1][1][3]=0.                         ;
+      dS_dO[1][2][3]=0.                         ;
+      dS_dO[1][3][3]=0.5*a2_+0.5*a3_            ;
+                                                  
+      dS_dO[2][0][3]=dS_dO[0][2][3]             ;
       dS_dO[2][1][3]=dS_dO[1][2][3]             ;
-      dS_dO[2][2][3]=2.*a1_+2.*a4_              ;
-      dS_dO[2][3][3]=2.*a1_+a3_                 ;
-      dS_dO[2][4][3]=0.                         ;
+      dS_dO[2][2][3]=0.                         ;
+      dS_dO[2][3][3]=0.5*a3_                    ;
                                                   
+      dS_dO[3][0][3]=dS_dO[0][3][3]             ;
       dS_dO[3][1][3]=dS_dO[1][3][3]             ;
       dS_dO[3][2][3]=dS_dO[2][3][3]             ;
-      dS_dO[3][3][3]=2.*a1_+2.*a2_+2.*a3_+2.*a4_;
-      dS_dO[3][4][3]=0.                         ;
+      dS_dO[3][3][3]=0.                         ;
                                                   
+//      IF[NTENS.EQ.6]THEN                        
+      dS_dO[0][4][3]=0.                         ;
+      dS_dO[0][5][3]=0.                         ;
+      dS_dO[1][4][3]=0.                         ;
+      dS_dO[1][5][3]=0.                         ;
+      dS_dO[2][4][3]=0.                         ;
+      dS_dO[2][5][3]=0.                         ;
+      dS_dO[3][4][3]=0.                         ;
+      dS_dO[3][5][3]=0.                         ;
+      dS_dO[4][0][3]=dS_dO[0][4][3]             ;
       dS_dO[4][1][3]=dS_dO[1][4][3]             ;
       dS_dO[4][2][3]=dS_dO[2][4][3]             ;
       dS_dO[4][3][3]=dS_dO[3][4][3]             ;
-      dS_dO[4][4][3]=a4_                        ;
+      dS_dO[4][4][3]=0.                         ;
+      dS_dO[4][5][3]=0.25*a2_                   ;
                                                   
-//      IF[NTENS.EQ.6]THEN                        
-      dS_dO[1][5][3]=0.                         ;
-      dS_dO[1][6][3]=0.                         ;
-      dS_dO[2][5][3]=0.                         ;
-      dS_dO[2][6][3]=0.                         ;
-      dS_dO[3][5][3]=0.                         ;
-      dS_dO[3][6][3]=0.                         ;
-      dS_dO[4][5][3]=0.                         ;
-      dS_dO[4][6][3]=0.                         ;
+      dS_dO[5][0][3]=dS_dO[0][5][3]             ;
       dS_dO[5][1][3]=dS_dO[1][5][3]             ;
       dS_dO[5][2][3]=dS_dO[2][5][3]             ;
       dS_dO[5][3][3]=dS_dO[3][5][3]             ;
       dS_dO[5][4][3]=dS_dO[4][5][3]             ;
-      dS_dO[5][5][3]=0.5*a2_+a4_                ;
-      dS_dO[5][6][3]=0.                         ;
-                                                  
-      dS_dO[6][1][3]=dS_dO[1][6][3]             ;
-      dS_dO[6][2][3]=dS_dO[2][6][3]             ;
-      dS_dO[6][3][3]=dS_dO[3][6][3]             ;
-      dS_dO[6][4][3]=dS_dO[4][6][3]             ;
-      dS_dO[6][5][3]=dS_dO[5][6][3]             ;
-      dS_dO[6][6][3]=0.5*a2_+a4_                ;
+      dS_dO[5][5][3]=0.                         ;
 //      ENDIF                                     
                                                   
-// ------- page 4 -------                       --
+//      IF[NTENS.EQ.6]THEN                        
+// ------- page 5 -------                       --
+      dS_dO[0][0][4]=0.                         ;
+      dS_dO[0][1][4]=0.                         ;
+      dS_dO[0][2][4]=0.                         ;
+      dS_dO[0][3][4]=0.                         ;
+      dS_dO[0][4][4]=0.5*a3_                    ;
+      dS_dO[0][5][4]=0.                         ;
+                                                  
+      dS_dO[1][0][4]=dS_dO[0][1][4]             ;
       dS_dO[1][1][4]=0.                         ;
       dS_dO[1][2][4]=0.                         ;
       dS_dO[1][3][4]=0.                         ;
       dS_dO[1][4][4]=0.5*a2_+0.5*a3_            ;
+      dS_dO[1][5][4]=0.                         ;
                                                   
+      dS_dO[2][0][4]=dS_dO[0][2][4]             ;
       dS_dO[2][1][4]=dS_dO[1][2][4]             ;
       dS_dO[2][2][4]=0.                         ;
       dS_dO[2][3][4]=0.                         ;
       dS_dO[2][4][4]=0.5*a2_+0.5*a3_            ;
+      dS_dO[2][5][4]=0.                         ;
                                                   
+      dS_dO[3][0][4]=dS_dO[0][3][4]             ;
       dS_dO[3][1][4]=dS_dO[1][3][4]             ;
       dS_dO[3][2][4]=dS_dO[2][3][4]             ;
       dS_dO[3][3][4]=0.                         ;
-      dS_dO[3][4][4]=0.5*a3_                    ;
+      dS_dO[3][4][4]=0.                         ;
+      dS_dO[3][5][4]=0.25*a2_                   ;
                                                   
+      dS_dO[4][0][4]=dS_dO[0][4][4]             ;
       dS_dO[4][1][4]=dS_dO[1][4][4]             ;
       dS_dO[4][2][4]=dS_dO[2][4][4]             ;
       dS_dO[4][3][4]=dS_dO[3][4][4]             ;
       dS_dO[4][4][4]=0.                         ;
-                                                  
-//      IF[NTENS.EQ.6]THEN                        
-      dS_dO[1][5][4]=0.                         ;
-      dS_dO[1][6][4]=0.                         ;
-      dS_dO[2][5][4]=0.                         ;
-      dS_dO[2][6][4]=0.                         ;
-      dS_dO[3][5][4]=0.                         ;
-      dS_dO[3][6][4]=0.                         ;
       dS_dO[4][5][4]=0.                         ;
-      dS_dO[4][6][4]=0.                         ;
+                                                  
+      dS_dO[5][0][4]=dS_dO[0][5][4]             ;
       dS_dO[5][1][4]=dS_dO[1][5][4]             ;
       dS_dO[5][2][4]=dS_dO[2][5][4]             ;
       dS_dO[5][3][4]=dS_dO[3][5][4]             ;
       dS_dO[5][4][4]=dS_dO[4][5][4]             ;
       dS_dO[5][5][4]=0.                         ;
-      dS_dO[5][6][4]=0.25*a2_                   ;
                                                   
-      dS_dO[6][1][4]=dS_dO[1][6][4]             ;
-      dS_dO[6][2][4]=dS_dO[2][6][4]             ;
-      dS_dO[6][3][4]=dS_dO[3][6][4]             ;
-      dS_dO[6][4][4]=dS_dO[4][6][4]             ;
-      dS_dO[6][5][4]=dS_dO[5][6][4]             ;
-      dS_dO[6][6][4]=0.                         ;
-//      ENDIF                                     
+// ------- page 6 -------                       --
+      dS_dO[0][0][5]=0.                         ;
+      dS_dO[0][1][5]=0.                         ;
+      dS_dO[0][2][5]=0.                         ;
+      dS_dO[0][3][5]=0.                         ;
+      dS_dO[0][4][5]=0.                         ;
+      dS_dO[0][5][5]=0.5*a2_+0.5*a3_            ;
                                                   
-//      IF[NTENS.EQ.6]THEN                        
-// ------- page 5 -------                       --
+      dS_dO[1][0][5]=dS_dO[0][1][5]             ;
       dS_dO[1][1][5]=0.                         ;
       dS_dO[1][2][5]=0.                         ;
       dS_dO[1][3][5]=0.                         ;
       dS_dO[1][4][5]=0.                         ;
       dS_dO[1][5][5]=0.5*a3_                    ;
-      dS_dO[1][6][5]=0.                         ;
                                                   
+      dS_dO[2][0][5]=dS_dO[0][2][5]             ;
       dS_dO[2][1][5]=dS_dO[1][2][5]             ;
       dS_dO[2][2][5]=0.                         ;
       dS_dO[2][3][5]=0.                         ;
       dS_dO[2][4][5]=0.                         ;
       dS_dO[2][5][5]=0.5*a2_+0.5*a3_            ;
-      dS_dO[2][6][5]=0.                         ;
                                                   
+      dS_dO[3][0][5]=dS_dO[0][3][5]             ;
       dS_dO[3][1][5]=dS_dO[1][3][5]             ;
       dS_dO[3][2][5]=dS_dO[2][3][5]             ;
       dS_dO[3][3][5]=0.                         ;
-      dS_dO[3][4][5]=0.                         ;
-      dS_dO[3][5][5]=0.5*a2_+0.5*a3_            ;
-      dS_dO[3][6][5]=0.                         ;
+      dS_dO[3][4][5]=0.25*a2_                   ;
+      dS_dO[3][5][5]=0.                         ;
                                                   
+      dS_dO[4][0][5]=dS_dO[0][4][5]             ;
       dS_dO[4][1][5]=dS_dO[1][4][5]             ;
       dS_dO[4][2][5]=dS_dO[2][4][5]             ;
       dS_dO[4][3][5]=dS_dO[3][4][5]             ;
       dS_dO[4][4][5]=0.                         ;
       dS_dO[4][5][5]=0.                         ;
-      dS_dO[4][6][5]=0.25*a2_                   ;
                                                   
+      dS_dO[5][0][5]=dS_dO[0][5][5]             ;
       dS_dO[5][1][5]=dS_dO[1][5][5]             ;
       dS_dO[5][2][5]=dS_dO[2][5][5]             ;
       dS_dO[5][3][5]=dS_dO[3][5][5]             ;
       dS_dO[5][4][5]=dS_dO[4][5][5]             ;
       dS_dO[5][5][5]=0.                         ;
-      dS_dO[5][6][5]=0.                         ;
-                                                  
-      dS_dO[6][1][5]=dS_dO[1][6][5]             ;
-      dS_dO[6][2][5]=dS_dO[2][6][5]             ;
-      dS_dO[6][3][5]=dS_dO[3][6][5]             ;
-      dS_dO[6][4][5]=dS_dO[4][6][5]             ;
-      dS_dO[6][5][5]=dS_dO[5][6][5]             ;
-      dS_dO[6][6][5]=0.                         ;
-                                                  
-// ------- page 6 -------                       --
-      dS_dO[1][1][6]=0.                         ;
-      dS_dO[1][2][6]=0.                         ;
-      dS_dO[1][3][6]=0.                         ;
-      dS_dO[1][4][6]=0.                         ;
-      dS_dO[1][5][6]=0.                         ;
-      dS_dO[1][6][6]=0.5*a2_+0.5*a3_            ;
-                                                  
-      dS_dO[2][1][6]=dS_dO[1][2][6]             ;
-      dS_dO[2][2][6]=0.                         ;
-      dS_dO[2][3][6]=0.                         ;
-      dS_dO[2][4][6]=0.                         ;
-      dS_dO[2][5][6]=0.                         ;
-      dS_dO[2][6][6]=0.5*a3_                    ;
-                                                  
-      dS_dO[3][1][6]=dS_dO[1][3][6]             ;
-      dS_dO[3][2][6]=dS_dO[2][3][6]             ;
-      dS_dO[3][3][6]=0.                         ;
-      dS_dO[3][4][6]=0.                         ;
-      dS_dO[3][5][6]=0.                         ;
-      dS_dO[3][6][6]=0.5*a2_+0.5*a3_            ;
-                                                  
-      dS_dO[4][1][6]=dS_dO[1][4][6]             ;
-      dS_dO[4][2][6]=dS_dO[2][4][6]             ;
-      dS_dO[4][3][6]=dS_dO[3][4][6]             ;
-      dS_dO[4][4][6]=0.                         ;
-      dS_dO[4][5][6]=0.25*a2_                   ;
-      dS_dO[4][6][6]=0.                         ;
-                                                  
-      dS_dO[5][1][6]=dS_dO[1][5][6]             ;
-      dS_dO[5][2][6]=dS_dO[2][5][6]             ;
-      dS_dO[5][3][6]=dS_dO[3][5][6]             ;
-      dS_dO[5][4][6]=dS_dO[4][5][6]             ;
-      dS_dO[5][5][6]=0.                         ;
-      dS_dO[5][6][6]=0.                         ;
-                                                  
-      dS_dO[6][1][6]=dS_dO[1][6][6]             ;
-      dS_dO[6][2][6]=dS_dO[2][6][6]             ;
-      dS_dO[6][3][6]=dS_dO[3][6][6]             ;
-      dS_dO[6][4][6]=dS_dO[4][6][6]             ;
-      dS_dO[6][5][6]=dS_dO[5][6][6]             ;
-      dS_dO[6][6][6]=0.                         ;
 //      ENDIF
 
 }
