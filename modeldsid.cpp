@@ -90,18 +90,18 @@ namespace models {
 
     Modeldsid::Modeldsid(): Bulk_(0.0),BulkB_(0.0),Shear_(0.0),Poisson_(0.0),E0_(0.0),
                Poisson0_(0.0),a1_(0.0),a2_(0.0),a3_(0.0),a4_(0.0),
-               C0_(0.0),C1_(0.0),alpha_(0.0),Debug_(0.0),Omega_11_(0.0),
-               Omega_22_(0.0),Omega_33_(0.0),Omega_12_(0.0),Omega_23_(0.0),Omega_31_(0.0),
-               Epsid_11_(0.0),Epsid_22_(0.0),Epsid_33_(0.0),Epsid_12_(0.0),Epsid_23_(0.0),
-               Epsid_31_(0.0) {   }
+               C0_(0.0),C1_(0.0),alpha_(0.0),Debug_(0.0),Omega_00_(0.0),
+               Omega_11_(0.0),Omega_22_(0.0),Omega_01_(0.0),Omega_12_(0.0),Omega_20_(0.0),
+               Epsid_00_(0.0),Epsid_11_(0.0),Epsid_22_(0.0),Epsid_01_(0.0),Epsid_12_(0.0),
+               Epsid_20_(0.0) {   }
 
     String Modeldsid::getProperties(void) const {
         return L"bulk,shear,bulk_bound,poisson,E0"
                L"poisson0,a1,a2,a3,a4,"
-               L"c0,c1,alpha,debug,omega11,"
-               L"omega22,omega33,omega12,omega23,omega31,"
-               L"epsid11,epsid22,epsid33,epsid12,epsid23,"
-               L"epsid31";
+               L"c0,c1,alpha,debug,omega00,"
+               L"omega11,omega22,omega01,omega12,omega20,"
+               L"epsid00,epsid11,epsid22,epsid01,epsid12,"
+               L"epsid20";
 
     }
 
@@ -131,21 +131,21 @@ namespace models {
             case 12: return(C1_)      ;
             case 13: return(alpha_)   ;
             case 14: return(Debug_)   ;
-            case 15: return(Omega_11_);
+            case 15: return(Omega_00_);
 //
-            case 16: return(Omega_22_);
-            case 17: return(Omega_33_);
-            case 18: return(Omega_12_);
-            case 19: return(Omega_23_);
-            case 20: return(Omega_31_);
+            case 16: return(Omega_11_);
+            case 17: return(Omega_22_);
+            case 18: return(Omega_01_);
+            case 19: return(Omega_12_);
+            case 20: return(Omega_20_);
 //
-            case 21: return(Epsid_11_);
-            case 22: return(Epsid_22_);
-            case 23: return(Epsid_33_);
-            case 24: return(Epsid_12_);
-            case 25: return(Epsid_23_);
+            case 21: return(Epsid_00_);
+            case 22: return(Epsid_11_);
+            case 23: return(Epsid_22_);
+            case 24: return(Epsid_01_);
+            case 25: return(Epsid_12_);
 //
-            case 26: return(Epsid_31_);
+            case 26: return(Epsid_20_);
         }
         return(0.0);
     }
@@ -167,18 +167,18 @@ namespace models {
             case 12: C1_          = p.toDouble();  break;
             case 13: alpha_       = p.toDouble();  break;
             case 14: Debug_       = p.toDouble();  break;
-            case 15: Omega_11_    = p.toDouble();  break;
-            case 16: Omega_22_    = p.toDouble();  break;
-            case 17: Omega_33_    = p.toDouble();  break;
-            case 18: Omega_12_    = p.toDouble();  break;
-            case 19: Omega_23_    = p.toDouble();  break;
-            case 20: Omega_31_    = p.toDouble();  break;
-            case 21: Epsid_11_    = p.toDouble();  break;
-            case 22: Epsid_22_    = p.toDouble();  break;
-            case 23: Epsid_33_    = p.toDouble();  break;
-            case 24: Epsid_12_    = p.toDouble();  break;
-            case 25: Epsid_23_    = p.toDouble();  break;
-            case 26: Epsid_31_    = p.toDouble();  break;
+            case 15: Omega_00_    = p.toDouble();  break;
+            case 16: Omega_11_    = p.toDouble();  break;
+            case 17: Omega_22_    = p.toDouble();  break;
+            case 18: Omega_01_    = p.toDouble();  break;
+            case 19: Omega_12_    = p.toDouble();  break;
+            case 20: Omega_20_    = p.toDouble();  break;
+            case 21: Epsid_00_    = p.toDouble();  break;
+            case 22: Epsid_11_    = p.toDouble();  break;
+            case 23: Epsid_22_    = p.toDouble();  break;
+            case 24: Epsid_01_    = p.toDouble();  break;
+            case 25: Epsid_12_    = p.toDouble();  break;
+            case 26: Epsid_20_    = p.toDouble();  break;
         }
     }
 
@@ -200,74 +200,63 @@ namespace models {
         C1_         = em->C1_      ;
         alpha_      = em->alpha_   ;
         Debug_      = em->Debug_   ;
+        Omega_00_   = em->Omega_00_;
         Omega_11_   = em->Omega_11_;
         Omega_22_   = em->Omega_22_;
-        Omega_33_   = em->Omega_33_;
+        Omega_01_   = em->Omega_01_;
         Omega_12_   = em->Omega_12_;
-        Omega_23_   = em->Omega_23_;
-        Omega_31_   = em->Omega_31_;
+        Omega_20_   = em->Omega_20_;
+        Epsid_00_   = em->Epsid_00_;
         Epsid_11_   = em->Epsid_11_;
         Epsid_22_   = em->Epsid_22_;
-        Epsid_33_   = em->Epsid_33_;
+        Epsid_01_   = em->Epsid_01_;
         Epsid_12_   = em->Epsid_12_;
-        Epsid_23_   = em->Epsid_23_;
-        Epsid_31_   = em->Epsid_31_;
+        Epsid_20_   = em->Epsid_20_;
         
     }
 
     void Modeldsid::initialize(UByte dim,State *s) {
         ConstitutiveModel::initialize(dim,s);
         // initialize mean pressure
+        Omega[0] = Omega_00_;
+        Omega[1] = Omega_11_;
+        Omega[2] = Omega_22_;
+        Omega[3] = Omega_01_;
+        Omega[4] = Omega_12_;
+        Omega[5] = Omega_20_;
+        effectiveStiffness(Matdom, Omega, E0_, Poisson0_, a1_, a2_, a3_, a4_,
+                           C0_, C1_, alpha_);
+        Epsid[0] = Epsid_00_;
+        Epsid[1] = Epsid_11_;
+        Epsid[2] = Epsid_22_;
+        Epsid[3] = Epsid_01_;
+        Epsid[4] = Epsid_12_;
+        Epsid[5] = Epsid_20_;
 
-        if (Bulk_ == 0.0) {
-            //--Effective stress of the microstructure
-            P0_m_ = MP_ + Suct_m_;
-            Bulk_ = MV_Ma_ * dP0 / Kappa_PS_;
-            //--Bulk modulus of the microstructure
-                if (Kappa_m_ == 0.0 || betha_m_ == 0.0) {
-                    throw std::runtime_error("dsid: Kappa_m_ = 0 or betha_m_ = 0");
-                } else {
-                    Bulk_m_ = a_1_ * MV_m_ * P0_m_ / Kappa_m_ + a_2_ * exp( alpha_m_ * P0_m_) / betha_m_;  // HX_11/30
-                }
-        }
+        dstran[0] = s->stnE_.s11();
+        dstran[1] = s->stnE_.s22();
+        dstran[2] = s->stnE_.s33();
+        dstran[3] = s->stnE_.s12();
+        dstran[4] = s->stnE_.s23();
+        dstran[5] = s->stnE_.s13();
 
-        // mark std::cout << " ###############  Iitialization ############### " << std::endl;
-        // mark std::cout << " MPC_ST_ = " <<  MPC_ST_ << " MPC_ = " <<  MPC_ << " MPC_T_ = " <<  MPC_T_ << std::endl;
-        /* --- initialize hydraulic modulus --- */
+        Stress[0] = s->stnS_.s11();
+        Stress[1] = s->stnS_.s22();
+        Stress[2] = s->stnS_.s33();
+        Stress[3] = s->stnS_.s12();
+        Stress[4] = s->stnS_.s13();
+        Stress[5] = s->stnS_.s23();
 
-        if ((P_ref_ > 0.0) && (Alpha_SP_ > 0.0)) {
-            Kappa_SP_ = Kappa_SP0_*(1.0+Alpha_SP_*log(dP0 / P_ref_)) * exp(Alpha_SS_*Suct_m_) ; 
-        } else {
-            Kappa_SP_  = Kappa_SP0_;
-        }
-
-        if (Kappa_SP_ == 0.) {
-            throw std::runtime_error("dsid: Kappa_SP_ = 0 ");
-        } else {
-            Bulk_H_ = MV_Ma_ * ( Suct_m_ + 0.1e6) / Kappa_SP_ ;
-        }
-
-        /* --- initialize total mechanical and hydraulic modulus --- */
-        if (Bulk_m_ == 0.0) {
-            if (Bulk_ == 0.0) {
-                throw std::runtime_error("dsid: All Bulk Modulus = 0 ");
-            } else {
-                Bulk_T_ = Bulk_ ;
-                Bulk_s_ = Bulk_H_ ;
-            }
-        } else {
-            if (Bulk_ == 0.0) {
-                Bulk_T_ = Bulk_m_* fs_frac_;
-                Bulk_ = 1e3;
-                Bulk_s_ = 1.0 / (1.0 / Bulk_H_ + 1.0 / Bulk_m_* fs_frac_);
-            } else {
-                Bulk_T_ = 1.0 / (1.0 / Bulk_ + 1.0 / Bulk_m_* fs_frac_);
-                Bulk_s_ = 1.0 / (1.0 / Bulk_H_ + 1.0 / Bulk_m_* fs_frac_);
-            }
-        }
-
-        /* --- initialize shear modulus --- */
-        Shear_ = 1.5*Bulk_T_*(1.0-2.0*Poisson_)/(1.0+Poisson_);
+        double E00 = 1./Matdom[0][0];
+        double E11 = 1./Matdom[1][1];
+        double E22 = 1./Matdom[2][2];
+        double G01 = Matdom[3][3];
+        double G12 = Matdom[4][4];
+        double G20 = Matdom[5][5];
+        double Emax;
+        Emax = MAX(E00, MAX(E11,E22));
+        Shear_ = MAX(G01, MAX(G12,G20));
+        Bulk = Emax*Shear_/3./(3.*Shear_-Emax);
     }
 
     static const UInt Pav    = 0;
@@ -307,10 +296,35 @@ namespace models {
         }
 
         /* --- trial elastic stresses --- */
-        Double dA1 = Bulk_T_ + dC4D3 * Shear_;
-        Double dA2 = Bulk_T_ - dC2D3 * Shear_;
-        Double dG2 = 2.0 * Shear_;
+        int ntens = Omega.size();
+        double zero = 0.;
+        double deps=0.;
+        double fd;
+        for (int i=0; i<ntens; i++) {deps+= dstran[i]*dstran[i];}
+        deps=sqrt(deps);
+        for (int i=0; i<ntens; i++) {
+            dSig[i]=0.;
+            for (int j=0; j<ntens; j++) {
+                if (j<3) {
+                    dSig += Matdom[i][j]*dstran[j];
+                } else {
+                    dSig += 2.* Matdom[i][j]*dstran[j];
+            }
+        }
 
+        for (int i=0; i<ntens; i++) {
+            Stress[i] += dSig[i];
+        }
+     
+        damageFunction(fd, Stress, Omega, E0_, Poisson0_, a1_, a2_, a3_, a4_,
+                       C0_, C1_, alpha_);
+        if (fd > tol) {
+            int Inc = 0;
+            double fdt = fd;
+            while(fdt>0 && ((fdt/fd)>tol && Inc < ITmax)) {
+
+            }
+        }
         s->stnS_.rs11() += s->stnE_.s11() * dA1 + (s->stnE_.s22() + s->stnE_.s33()) * dA2;
         s->stnS_.rs22() += s->stnE_.s22() * dA1 + (s->stnE_.s11() + s->stnE_.s33()) * dA2;
         s->stnS_.rs33() += s->stnE_.s33() * dA1 + (s->stnE_.s11() + s->stnE_.s22()) * dA2;

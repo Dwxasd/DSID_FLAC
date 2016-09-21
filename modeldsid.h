@@ -48,7 +48,7 @@ namespace models {
       Double Epsid_11_,Epsid_22_,Epsid_33_,Epsid_12_,Epsid_23_;
       Double Epsid_31_;
       r2Tensor<double> Matdom(6,6)
-      r1Tensor<double> Omega(6),Epsid(6);
+      r1Tensor<double> Omega(6),Epsid(6), dstran(6), Stress(6), dSig(6);
   };
 }
 //EOF
