@@ -50,7 +50,7 @@ void effectiveStiffness(r2Tensor<double> &Matdom, const r1Tensor<double> &Omega,
                         const double & a3_, const double & a4_, const double & C0_,
                         const double & C1_, const double & alpha_);
 
-void damageFuntion(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<double> &Omega, const double & E0_,
+void damageFunction(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<double> &Omega, const double & E0_,
                    const double & Poisson0_, const double & a1_, const double & a2_,
                    const double & a3_, const double & a4_, const double & C0_,
                    const double & C1_, const double & alpha_, const int & ioptfd);
@@ -299,7 +299,9 @@ namespace models {
         int ntens = Omega.size();
         double zero = 0.;
         double deps=0.;
-        double fd;
+        double fd, fdt, XL;
+        int iopt;
+        const double tol = 1e-6, ITmax = 250, tiny = 1e-3;
         for (int i=0; i<ntens; i++) {deps+= dstran[i]*dstran[i];}
         deps=sqrt(deps);
         for (int i=0; i<ntens; i++) {
@@ -322,9 +324,28 @@ namespace models {
             int Inc = 0;
             double fdt = fd;
             while(fdt>0 && ((fdt/fd)>tol && Inc < ITmax)) {
-
+                iopt = 0;
+                if (Inc == 0) iopt =0;
+                cuttingPlaneMethod(Omega, Sigma, Matdom, E0_, Poisson0_, a1_, a2_, a3_, a4_,
+                                   C0_, C1_, alpha_, H0, Hp, dG_dY, df_dSig, temp, iopt);
+                XL = fdt/(H0-HP);
+                if (dstrain>tiny) XL/=1.5;
+                for (int i=0; i<ntens; i++) {
+                    Omega[i] += XL*dG_dY[i];
+                    Epsid[i] += XL*df_dSig[i];
+                    Stress[i] -= XL*temp[i];
+                }
+                ioptfd = 2;
+                damageFunction(fdt, Stress, Omega, E0_, Poisson0_, a1_, a2_, a3_, a4_,
+                       C0_, C1_, alpha_, ioptfd);
+                Inc += 1;
             }
+            if (Inc>=ITmax) throwout("DSID: no convergence");
         }
+        ioptfd = 3;
+        damageFunction(fd2, Stress, Omega, E0_, Poisson0_, a1_, a2_, a3_, a4_,
+                       C0_, C1_, alpha_, ioptfd);
+        
         s->stnS_.rs11() += s->stnE_.s11() * dA1 + (s->stnE_.s22() + s->stnE_.s33()) * dA2;
         s->stnS_.rs22() += s->stnE_.s22() * dA1 + (s->stnE_.s11() + s->stnE_.s33()) * dA2;
         s->stnS_.rs33() += s->stnE_.s33() * dA1 + (s->stnE_.s11() + s->stnE_.s22()) * dA2;
@@ -880,7 +901,7 @@ void effectiveStiffness(r2Tensor<double> &Matdom, const r1Tensor<double> &Omega,
      
 }
 
-void damageFuntion(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<double> &Omega, const double & E0_,
+void damageFunction(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<double> &Omega, const double & E0_,
                    const double & Poisson0_, const double & a1_, const double & a2_,
                    const double & a3_, const double & a4_, const double & C0_,
                    const double & C1_, const double & alpha_, const int & ioptfd) {
