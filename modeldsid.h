@@ -32,7 +32,7 @@ namespace models {
 
       //virtual Modeldsid *clone() const { return(NEW("Modeldsid") Modeldsid()); }
       virtual Modeldsid    *clone() const { return new Modeldsid(); }
-      virtual Double        getConfinedModulus() const { return(BulkB_ + Shear_*4.0/3.0); }
+      virtual Double        getConfinedModulus() const { return(Bulk_ + Shear_*4.0/3.0); }
       virtual Double        getShearModulus() const { return(Shear_); }
       virtual Double        getBulkModulus() const { return(Bulk_); }
       virtual void          copy(const ConstitutiveModel *mod);
@@ -42,11 +42,10 @@ namespace models {
       // Optional
       virtual bool          supportsHystereticDamping() const { return(false); }
     private:
-      Double Bulk_,BulkB_,Shear_,Poisson_,E0_,Poisson0_,a1_,a2_,a3_,a4_;
-      Double C0_,C1_,alpha_,Debug_,Omega_11_;
-      Double Omega_22_,Omega_33_,Omega_12_,Omega_23_,Omega_31_;
-      Double Epsid_11_,Epsid_22_,Epsid_33_,Epsid_12_,Epsid_23_;
-      Double Epsid_31_;
+      Double Bulk_,Shear_,E0_,Poisson0_,a1_,a2_,a3_,a4_,C0_,C1_;
+      Double alpha_,Debug_,Omega_00,Omega_11_,Omega_22_;
+      Double Omega_01_,Omega_12_,Omega_20_,Epsid_00_,Epsid_11_;
+      Double Epsid_22_,Epsid_01_,Epsid_12_,Epsid_20_;
       r2Tensor<double> Matdom(6,6)
       r1Tensor<double> Omega(6),Epsid(6), dstran(6), Stress(6), dSig(6);
   };
