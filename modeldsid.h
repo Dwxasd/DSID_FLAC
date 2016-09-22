@@ -9,13 +9,13 @@
 #pragma once
 
 #include "C:\Program Files\Itasca\Flac3d500\pluginfiles\models\src\conmodel.h"
-#include "../mathLib/arithmetic.h"
-#include "../mathLib/r1Tensor.h"
-#include "../mathLib/r2Tensor.h"
-#include "../mathLib/r3Tensor.h"
-#include "../mathLib/errInfo.h"
-#include "../mathLib/gaussj.h"
-#include "../mathLib/eigen.h"
+#include "..\mathLib\arithmetic.h"
+#include "..\mathLib\r1Tensor.h"
+#include "..\mathLib\r2Tensor.h"
+#include "..\mathLib\r3Tensor.h"
+#include "..\mathLib\errInfo.h"
+#include "..\mathLib\gaussj.h"
+#include "..\mathLib\eigen.h"
 
 namespace models {
   class Modeldsid : public ConstitutiveModel  {
@@ -43,11 +43,12 @@ namespace models {
       virtual bool          supportsHystereticDamping() const { return(false); }
     private:
       Double Bulk_,Shear_,E0_,Poisson0_,a1_,a2_,a3_,a4_,C0_,C1_;
-      Double alpha_,Debug_,Omega_00,Omega_11_,Omega_22_;
+      Double alpha_,Debug_,Omega_00_,Omega_11_,Omega_22_;
       Double Omega_01_,Omega_12_,Omega_20_,Epsid_00_,Epsid_11_;
       Double Epsid_22_,Epsid_01_,Epsid_12_,Epsid_20_;
-      r2Tensor<double> Matdom(6,6)
-      r1Tensor<double> Omega(6),Epsid(6), dstran(6), Stress(6), dSig(6);
+
+      r2Tensor<double> Matdom;
+      r1Tensor<double> Omega,Epsid,dstran,Stress,dSig;
   };
 }
 //EOF

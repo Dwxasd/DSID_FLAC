@@ -13,13 +13,13 @@
 #include <fstream>
 #include <complex>
 #include <assert.h>
-#include "../mathLib/arithmetic.h"
-#include "../mathLib/r1Tensor.h"
-#include "../mathLib/r2Tensor.h"
-#include "../mathLib/r3Tensor.h"
-#include "../mathLib/errInfo.h"
-#include "../mathLib/gaussj.h"
-#include "../mathLib/eigen.h"
+#include "..\mathLib\arithmetic.h"
+#include "..\mathLib\r1Tensor.h"
+#include "..\mathLib\r2Tensor.h"
+#include "..\mathLib\r3Tensor.h"
+#include "..\mathLib\errInfo.h"
+#include "..\mathLib\gaussj.h"
+#include "..\mathLib\eigen.h"
 
 
 #ifdef DSID_EXPORTS
@@ -65,11 +65,11 @@ void dY_dSigFunction(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,co
              const double & C1_, const double & alpha_);
 
 // SUB FD_LAM
-void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &Sigma, r2tensor<double> &Matdom,const double & E0_,
+void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &Sigma, r2Tensor<double> &Matdom,const double & E0_,
              const double & Poisson0_, const double & a1_, const double & a2_,
              const double & a3_, const double & a4_, const double & C0_,
              const double & C1_, const double & alpha_, double & H0,
-             double & Hp, r1Tensor<double> &dG_dY, r1Tensor<double> &df_dSig,
+             double & HP, r1Tensor<double> &dG_dY, r1Tensor<double> &df_dSig,
              r1Tensor<double> &temp, const int & iopt);
 
 void Mat_dS_dOmega(r3Tensor<double> &dS_dO, const double & E0_,
@@ -92,7 +92,8 @@ namespace models {
                a2_(0.0),a3_(0.0),a4_(0.0),C0_(0.0),C1_(0.0),
                alpha_(0.0),Debug_(0.0),Omega_00_(0.0),Omega_11_(0.0),Omega_22_(0.0),
                Omega_01_(0.0),Omega_12_(0.0),Omega_20_(0.0),Epsid_00_(0.0),Epsid_11_(0.0),
-               Epsid_22_(0.0),Epsid_01_(0.0),Epsid_12_(0.0),Epsid_20_(0.0) {   }
+               Epsid_22_(0.0),Epsid_01_(0.0),Epsid_12_(0.0),Epsid_20_(0.0),Matdom(6,6,0.),
+               Omega(6,0.),Epsid(6,0.),dstran(6,0.),Stress(6,0.),dSig(6,0.) {   }
 
     String Modeldsid::getProperties(void) const {
         return L"bulk,shear,E0,poisson0,a1,"
@@ -269,8 +270,10 @@ namespace models {
         int ntens = Omega.size();
         double zero = 0.;
         double deps = 0.;
-        double fd, fdt, fd2, XL;
+        double fd, fd2, XL;
         int iopt, ioptfd;
+        double H0, HP;
+        r1Tensor<double> dG_dY(ntens), df_dSig(ntens), temp(ntens);
         const double tol = 1e-6, ITmax = 250, tiny = 1e-3;
         r1Tensor<double> Omega0(ntens), Epsid0(ntens);
         Omega[0] = Omega_00_;
@@ -309,9 +312,9 @@ namespace models {
             dSig[i] = 0.;
             for (int j=0; j<ntens; j++) {
                 if (j<3) {
-                    dSig += Matdom[i][j]*dstran[j];
+                    dSig[i] += Matdom[i][j]*dstran[j];
                 } else {
-                    dSig += 2.* Matdom[i][j]*dstran[j];
+                    dSig[i] += 2.* Matdom[i][j]*dstran[j];
             }
         }
 
@@ -342,7 +345,7 @@ namespace models {
                 iopt = 0;
                 if (Inc == 0) iopt =0;
                 cuttingPlaneMethod(Omega, Stress, Matdom, E0_, Poisson0_, a1_, a2_, a3_, a4_,
-                                   C0_, C1_, alpha_, H0, Hp, dG_dY, df_dSig, temp, iopt);
+                                   C0_, C1_, alpha_, H0, HP, dG_dY, df_dSig, temp, iopt);
                 XL = fdt/(H0-HP);
                 if (deps>tiny) XL/=1.5;
                 for (int i=0; i<ntens; i++) {
@@ -446,6 +449,7 @@ namespace models {
     }
 }
 
+}
 
 void effectiveStiffness(r2Tensor<double> &Matdom, const r1Tensor<double> &Omega, const double & E0_,
                         const double & Poisson0_, const double & a1_, const double & a2_,
@@ -453,7 +457,7 @@ void effectiveStiffness(r2Tensor<double> &Matdom, const r1Tensor<double> &Omega,
                         const double & C1_, const double & alpha_){
      int ntens = Matdom.dim1();
      double zero = 0;
-     double trOmega, b1, b2, coe1, coe2,
+     double trOmega, b1, b2, coe1, coe2;
      r2Tensor<double> MatS(ntens,ntens,zero);
      Matdom = MatS;
 
@@ -539,10 +543,10 @@ void damageFunction(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<d
      trSigSig = SigSig[1] + SigSig[2] + SigSig[3];
 
      for (int i=0; i<ntens; i++)
-          yd1[i]= a1_*trSigma**2.*e1[i]+a2_*SigSig[i]+a3_*trSigma*Sigma[i]+a4_*trSigSig*e1[i];
+          yd1[i]= a1_*trSigma*trSigma*e1[i]+a2_*SigSig[i]+a3_*trSigma*Sigma[i]+a4_*trSigSig*e1[i];
      
 
-     MATP1(P1,Sigma);
+     matP1(P1,Sigma);
 
      for (int i=0; i<ntens; ++i) {
             P1Y[i] = 0.;
@@ -592,7 +596,7 @@ void matP1(r2Tensor<double> &P1, const r1Tensor<double> &Sigma) {
     sigma0 = sigma1;
     Unsymmeig h(sigma0);
     for (int i=0; i<m; i++) {
-        if (abs(h.wri[i].real())<tol) h.wri[i].real()=0.;
+        if (abs(h.wri[i].real())<tol) h.wri[i].real(0.);
     }
     for (int i=0; i<m; i++) {
         if (h.wri[i].real()>=0){
@@ -628,9 +632,9 @@ void matP1(r2Tensor<double> &P1, const r1Tensor<double> &Sigma) {
     }
 }
 
-void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma);
+void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma) {
     int ntens = Sigma.size();
-    int m=3;i
+    int m=3;
     double res;
     r1Tensor<double> s(m), anan1(ntens), anan2(ntens), anan3(ntens);
     r2Tensor<double> sigma1(m,m), sigma0(m,m);
@@ -674,6 +678,7 @@ void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma);
                        s[2] * anan3[i]*anan3[j];
         }
     }
+}
 
 void dY_dSigFunction(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,const double & E0_,
              const double & Poisson0_, const double & a1_, const double & a2_,
@@ -730,11 +735,11 @@ void dY_dSigFunction(const r1Tensor<double> &Sigma, r2Tensor<double> &dY_dSig,co
 }
 
 // SUB FD_LAM
-void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &Sigma, r2tensor<double> &Matdom,const double & E0_,
+void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &Sigma, r2Tensor<double> &Matdom,const double & E0_,
              const double & Poisson0_, const double & a1_, const double & a2_,
              const double & a3_, const double & a4_, const double & C0_,
              const double & C1_, const double & alpha_, double & H0,
-             double & Hp, r1Tensor<double> &dG_dY, r1Tensor<double> &df_dSig,
+             double & HP, r1Tensor<double> &dG_dY, r1Tensor<double> &df_dSig,
              r1Tensor<double> &temp, const int & iopt){
     int ntens = Omega.size();
     double zero=0.;
@@ -764,7 +769,7 @@ void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &S
     trSigSig =SigSig[0]+SigSig[1]+SigSig[2];
 
     for (int i=0; i<ntens; i++) {
-        yd1[i]= a1_*trSigma**2.*e[i]+a2_*SigSig[i]+
+        yd1[i]= a1_*trSigma*trSigma*e[i]+a2_*SigSig[i]+
               a3_*trSigma*Sigma[i]+a4_*trSigSig*e[i];
     }
 
@@ -861,7 +866,7 @@ void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &S
         }
     }
       
-    f1f1=0.
+    f1f1=0.;
     for (int i=0; i<ntens; i++) {
         if (i<3) {
             f1f1+=f1ij[i]*f1ij[i];
@@ -927,7 +932,7 @@ void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &S
          temp1[i]+=df_dSig[i];
     }
      
-    if(iopt.eq.1) {
+    if(iopt == 1) {
       effectiveStiffness(Matdom,Omega,
                E0_,Poisson0_,a1_,a2_,a3_,a4_,C0_,C1_,alpha_);
     }
