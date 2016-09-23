@@ -315,6 +315,7 @@ namespace models {
                     dSig[i] += Matdom[i][j]*dstran[j];
                 } else {
                     dSig[i] += 2.* Matdom[i][j]*dstran[j];
+                }
             }
         }
 
@@ -447,8 +448,6 @@ namespace models {
             s->viscous_ = true;  // allow viscous strains
         }
     }
-}
-
 }
 
 void effectiveStiffness(r2Tensor<double> &Matdom, const r1Tensor<double> &Omega, const double & E0_,
