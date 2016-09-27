@@ -534,12 +534,12 @@ void damageFunction(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<d
      r2Tensor<double> P1(ntens,ntens,zero);
      for (int i=0; i<3; i++) e1[i]=1;
      
-     trSigma = Sigma[1] + Sigma[2] + Sigma[3];
-     trOmega = Omega[1] + Omega[2] + Omega[3];
+     trSigma = Sigma[0] + Sigma[1] + Sigma[2];
+     trOmega = Omega[0] + Omega[1] + Omega[2];
 
      Aik_Bkj(Sigma,Sigma,SigSig);
 
-     trSigSig = SigSig[1] + SigSig[2] + SigSig[3];
+     trSigSig = SigSig[0] + SigSig[1] + SigSig[2];
 
      for (int i=0; i<ntens; i++)
           yd1[i]= a1_*trSigma*trSigma*e1[i]+a2_*SigSig[i]+a3_*trSigma*Sigma[i]+a4_*trSigSig*e1[i];
@@ -558,7 +558,7 @@ void damageFunction(double & fd, const r1Tensor<double> &Sigma, const r1Tensor<d
          }
      }
 
-     trY = P1Y[1] + P1Y[2] + P1Y[3];
+     trY = P1Y[0] + P1Y[1] + P1Y[2];
 
      for (int i=0; i<ntens; ++i)
           sij[i] = P1Y[i]-1./3.*trY*e1[i];
@@ -622,8 +622,8 @@ void matP1(r2Tensor<double> &P1, const r1Tensor<double> &Sigma) {
     anan2[5] = h.zz[2][1]*h.zz[0][1];
     anan3[5] = h.zz[2][2]*h.zz[0][2];
 
-    for (int i=0; i<m; i++) {
-        for (int j=0; j<m; j++) {
+    for (int i=0; i<ntens; i++) {
+        for (int j=0; j<ntens; j++) {
             P1[i][j] = s[0] * anan1[i]*anan1[j] +
                        s[1] * anan2[i]*anan2[j] +
                        s[2] * anan3[i]*anan3[j];
@@ -651,6 +651,7 @@ void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma) {
         } else {
             s[i] = 0.;
         }
+        if (abs(res)<tol) s[i] = 0.;
     }
     for (int i=0; i<m; i++) {
         anan1[i] = h.zz[i][0]*h.zz[i][0];
@@ -670,8 +671,8 @@ void matP2(r2Tensor<double> &P2, const r1Tensor<double> &Sigma) {
     anan2[5] = h.zz[2][1]*h.zz[0][1];
     anan3[5] = h.zz[2][2]*h.zz[0][2];
 
-    for (int i=0; i<m; i++) {
-        for (int j=0; j<m; j++) {
+    for (int i=0; i<ntens; i++) {
+        for (int j=0; j<ntens; j++) {
             P2[i][j] = s[0] * anan1[i]*anan1[j] +
                        s[1] * anan2[i]*anan2[j] +
                        s[2] * anan3[i]*anan3[j];
@@ -748,7 +749,7 @@ void cuttingPlaneMethod(const r1Tensor<double> &Omega, const r1Tensor<double> &S
     r1Tensor<double> f1p3(ntens),zeros(ntens,zero),temp1(ntens); 
     r2Tensor<double> P1(ntens,ntens), dY_dSig(ntens,ntens),eep1(ntens,ntens);
     r2Tensor<double> P3(ntens,ntens), P2(ntens,ntens), temp2(ntens,ntens);
-    r3Tensor<double> dS_dOmega; 
+    r3Tensor<double> dS_dOmega(ntens,ntens,ntens,0.); 
 
     //DATA ONE,TWO,HALF / 1.0D0,2.0D0,0.5D0 /
 

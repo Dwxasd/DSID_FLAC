@@ -9,13 +9,13 @@
 #pragma once
 
 #include "C:\Program Files\Itasca\Flac3d500\pluginfiles\models\src\conmodel.h"
-#include "..\mathLib\arithmetic.h"
+//#include "..\mathLib\arithmetic.h"
 #include "..\mathLib\r1Tensor.h"
 #include "..\mathLib\r2Tensor.h"
 #include "..\mathLib\r3Tensor.h"
-#include "..\mathLib\errInfo.h"
-#include "..\mathLib\gaussj.h"
-#include "..\mathLib\eigen.h"
+//#include "..\mathLib\errInfo.h"
+//#include "..\mathLib\gaussj.h"
+//#include "..\mathLib\eigen.h"
 
 namespace models {
   class Modeldsid : public ConstitutiveModel  {
